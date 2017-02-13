@@ -47,8 +47,9 @@ class LearningAgent(Agent):
             self.epsilon = 0
             self.alpha = 0
         else:
-            self.epsilon = 0.97**self.learning_iter
+            # self.epsilon -= 0.05
             # self.epsilon = math.exp(-0.95 * self.learning_iter)
+            self.epsilon = 0.98**self.learning_iter
             self.learning_iter += 1
 
         return None
@@ -126,7 +127,21 @@ class LearningAgent(Agent):
             if random.random() < self.epsilon:
                 action = random.choice(self.valid_actions)
             else:
-                action = max(self.Q[state], key=self.Q[state].get)
+                # gets all optimal actions and randomly chooses one of them
+                max_v = None
+                optimal_actions = []
+                for a in self.Q[state]:
+                    v = self.Q[state][a]
+                    if max_v == None:
+                        max_v = v
+                        optimal_actions = [a]
+                    elif v > max_v:
+                        max_v = v
+                        optimal_actions = [a]
+                    elif v == max_v:
+                        optimal_actions.append(a)
+
+                action = random.choice(optimal_actions)
         else:
             action = random.choice(self.valid_actions)
  
@@ -152,7 +167,7 @@ class LearningAgent(Agent):
 
             # if p_state != None:
                 # self.Q[p_state][p_action] = self.Q[p_state][p_action] + self.alpha * (p_reward + self.Q[state][action] - self.Q[p_state][p_action])
-            self.Q[state][action] = self.Q[state][action] + self.alpha * (reward)
+            self.Q[state][action] = self.Q[state][action] + self.alpha * (reward + 0 - self.Q[state][action])
 
             # Save the last values for state and action
             # self.prev_state = state
